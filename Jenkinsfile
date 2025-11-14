@@ -3,9 +3,12 @@ pipeline {
 
     stages {
 
-        stage('Install Dependencies') {
+        stage('Setup Python Venv') {
             steps {
                 sh '''
+                    python3 -m venv robotenv
+                    . robotenv/bin/activate
+
                     pip install --upgrade pip
                     pip install robotframework
                 '''
@@ -15,6 +18,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh '''
+                    . robotenv/bin/activate
                     robot -d results tests/
                 '''
             }
