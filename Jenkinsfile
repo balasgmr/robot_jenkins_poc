@@ -6,13 +6,10 @@ pipeline {
         stage('Setup Python Environment') {
             steps {
                 sh '''#!/bin/bash
-                    # Activate virtual environment
                     . /opt/robot-env/bin/activate
 
-                    # Upgrade pip inside venv
                     pip install --upgrade pip
 
-                    # Install Robot Framework dependencies
                     pip install robotframework \
                                 robotframework-seleniumlibrary \
                                 selenium \
@@ -25,7 +22,7 @@ pipeline {
             steps {
                 sh '''#!/bin/bash
                     . /opt/robot-env/bin/activate
-                    
+
                     mkdir -p results
 
                     export CHROME_BIN=/usr/bin/chromium
@@ -38,10 +35,17 @@ pipeline {
 
         stage('Publish Reports') {
             steps {
-
                 archiveArtifacts artifacts: 'results/*', fingerprint: true
 
                 publishHTML([
                     reportDir: 'results',
                     reportFiles: 'report.html',
                     reportName: 'Robot Framework Report',
+                    allowMissing: false,
+                    keepAll: true,
+                    alwaysLinkToLastBuild: true
+                ])
+            }
+        }
+    }
+}
