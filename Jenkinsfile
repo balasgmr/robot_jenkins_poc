@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Define browser environment variables for Robot Framework
         BROWSER = 'chromium'
         WDM_LOG = '0'
         WDM_PRINT_FIRST_LINE = '0'
@@ -22,7 +21,7 @@ pipeline {
                     # Create a Python virtual environment
                     python3 -m venv robotenv
 
-                    # Activate virtual environment and install required Python packages
+                    # Activate virtual environment and install Python packages
                     . robotenv/bin/activate && \
                     pip install --upgrade pip --break-system-packages && \
                     pip install robotframework robotframework-seleniumlibrary selenium webdriver-manager --break-system-packages
@@ -39,7 +38,7 @@ pipeline {
                     # Create results folder
                     mkdir -p results
 
-                    # Run Robot Framework tests
+                    # Run Robot Framework tests headlessly
                     robot -d results tests/
                 '''
             }
