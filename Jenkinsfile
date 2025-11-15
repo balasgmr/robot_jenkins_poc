@@ -9,14 +9,10 @@ pipeline {
                     apt-get update
                     apt-get install -y chromium chromium-driver python3-venv
 
-                    # Create a virtual environment
                     python3 -m venv robotenv
 
-                    # Activate venv
-                    . robotenv/bin/activate
-
-                    # Install dependencies inside venv
-                    pip install --upgrade pip --break-system-packages
+                    . robotenv/bin/activate && \
+                    pip install --upgrade pip --break-system-packages && \
                     pip install robotframework robotframework-seleniumlibrary selenium webdriver-manager --break-system-packages
                 '''
             }
@@ -27,7 +23,11 @@ pipeline {
                 sh '''
                     . robotenv/bin/activate
 
+                    mkdir -p results
+
                     export BROWSER=chromium
+                    export WDM_LOG=0
+                    export WDM_PRINT_FIRST_LINE=0
 
                     robot -d results tests/
                 '''
