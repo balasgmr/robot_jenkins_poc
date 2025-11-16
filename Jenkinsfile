@@ -4,7 +4,7 @@ pipeline {
     parameters {
         choice(
             name: 'TEST_TYPE',
-            choices: ['UI', 'API', 'BOTH'],
+            choices: ['UI', 'API', 'BOTH', 'PERF'],
             description: 'Select which tests to run'
         )
     }
@@ -47,7 +47,7 @@ pipeline {
                             mkdir -p results
                             robot -d results tests/api
                         """
-                    } else {
+                    } else if (params.TEST_TYPE == 'BOTH') {
                         sh """
                             . ${VENV_DIR}/bin/activate
                             mkdir -p results
@@ -58,9 +58,26 @@ pipeline {
             }
         }
 
+        stage('Run k6 Performance Test') {
+            when {
+                expression { return params.TEST_TYPE == 'PERF' || params.TEST_TYPE == 'BOTH' }
+            }
+            steps {
+                // Install k6 if not already installed
+                sh 'which k6 || sudo apt-get update && sudo apt-get install -y k6'
+
+                // Run the k6 script
+                sh """
+                    mkdir -p k6_results
+                    k6 run --out json=k6_results/perf.json tests/perf/load_test.js
+                """
+            }
+        }
+
         stage('Publish Reports') {
             steps {
                 archiveArtifacts artifacts: 'results/*.html', allowEmptyArchive: true
+                archiveArtifacts artifacts: 'k6_results/*.json', allowEmptyArchive: true
 
                 robot outputPath: 'results',
                       outputFileName: 'output.xml',
@@ -74,7 +91,7 @@ pipeline {
 
     post {
         always {
-            echo "Build completed. Check results/ folder and Jenkins Robot report."
+            echo "Build completed. Check results/ folder, Jenkins Robot report, and k6_results/ folder."
         }
     }
 }
