@@ -1,6 +1,7 @@
 *** Settings ***
 Library    RequestsLibrary
 Library    Collections
+Library    BuiltIn
 
 Suite Setup       Create Session    jsonplaceholder    https://jsonplaceholder.typicode.com
 Suite Teardown    Delete All Sessions
@@ -14,7 +15,8 @@ Get All Posts
     ${response}=    GET On Session    jsonplaceholder    ${resource}
     Should Be Equal As Integers    ${response.status_code}    200
     ${body}=    Set Variable    ${response.json()}
-    Length Should Be Greater Than    ${body}    0
+    ${count}=    Get Length    ${body}
+    Should Be True    ${count} > 0    msg=Expected more than 0 posts, but got ${count}
 
 Get Single Post
     ${response}=    GET On Session    jsonplaceholder    ${resource}/1
