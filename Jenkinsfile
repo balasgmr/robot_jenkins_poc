@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.11-slim'
+            args '-u root' // run as root to allow package installs
+        }
+    }
 
     parameters {
         choice(
@@ -10,7 +15,7 @@ pipeline {
     }
 
     environment {
-        VENV_DIR = "${WORKSPACE}/robotenv"
+        WORKSPACE = "${env.WORKSPACE}"
     }
 
     stages {
@@ -21,58 +26,47 @@ pipeline {
             }
         }
 
-        stage('Setup Python Environment') {
+        stage('Install Dependencies') {
             steps {
                 sh '''
-                    # Install Python3 and pip if not installed
-                    if ! command -v python3 >/dev/null; then
-                        apt-get update && apt-get install -y python3 python3-venv python3-pip
-                    fi
-
-                    # Create virtual environment
-                    python3 -m venv $VENV_DIR
-                    . $VENV_DIR/bin/activate
-
-                    # Upgrade pip and install Robot Framework dependencies
+                    python3 -m venv robotenv
+                    . robotenv/bin/activate
                     pip install --upgrade pip
-                    pip install robotframework robotframework-seleniumlibrary selenium webdriver-manager robotframework-requests k6
+                    pip install robotframework robotframework-seleniumlibrary selenium webdriver-manager robotframework-requests
+                    pip install k6  # optional: only if you want to run k6 locally
+                    mkdir -p results k6_results
                 '''
             }
         }
 
-        stage('Run Robot UI Tests') {
-            when {
-                expression { params.TEST_TYPE == 'UI' || params.TEST_TYPE == 'BOTH' }
-            }
+        stage('Run Robot Tests') {
             steps {
-                sh '''
-                    . $VENV_DIR/bin/activate
-                    mkdir -p results/ui
-                    robot -d results/ui tests/ui
-                '''
-            }
-        }
+                script {
+                    if (params.TEST_TYPE == 'UI' || params.TEST_TYPE == 'BOTH') {
+                        sh '''
+                            . robotenv/bin/activate
+                            robot -d results/ui tests/ui
+                        '''
+                    }
 
-        stage('Run Robot API Tests') {
-            when {
-                expression { params.TEST_TYPE == 'API' || params.TEST_TYPE == 'BOTH' }
-            }
-            steps {
-                sh '''
-                    . $VENV_DIR/bin/activate
-                    mkdir -p results/api
-                    robot -d results/api tests/api
-                '''
+                    if (params.TEST_TYPE == 'API' || params.TEST_TYPE == 'BOTH') {
+                        sh '''
+                            . robotenv/bin/activate
+                            robot -d results/api tests/api
+                        '''
+                    }
+                }
             }
         }
 
         stage('Run k6 Performance Test') {
             when {
-                expression { params.TEST_TYPE == 'BOTH' }
+                expression { return params.TEST_TYPE == 'BOTH' }
             }
             steps {
                 sh '''
-                    mkdir -p k6_results
+                    # If you installed k6 in Python venv, run it directly
+                    # Otherwise, you can run k6 via Docker if preferred
                     k6 run --out json=k6_results/perf.json tests/perf/load_test.js
                 '''
             }
@@ -83,7 +77,6 @@ pipeline {
                 archiveArtifacts artifacts: 'results/**/*.html', allowEmptyArchive: true
                 archiveArtifacts artifacts: 'k6_results/*.json', allowEmptyArchive: true
 
-                // Robot Framework reporting
                 robot outputPath: 'results',
                       outputFileName: 'output.xml',
                       logFileName: 'log.html',
