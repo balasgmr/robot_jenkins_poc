@@ -1,80 +1,70 @@
 pipeline {
-    agent any
+    agent none  // we'll define agent per stage
 
     parameters {
         choice(
             name: 'TEST_TYPE',
-            choices: ['UI', 'API', 'BOTH', 'PERF'],
+            choices: ['UI', 'API', 'BOTH'],
             description: 'Select which tests to run'
         )
-    }
-
-    environment {
-        VENV_DIR = "${WORKSPACE}/robotenv"
     }
 
     stages {
 
         stage('Checkout SCM') {
+            agent any
             steps {
                 git url: 'https://github.com/balasgmr/robot_jenkins_poc.git', branch: 'main'
             }
         }
 
-        stage('Setup Python Environment') {
-            steps {
-                sh """
-                    python3 -m venv ${VENV_DIR}
-                    . ${VENV_DIR}/bin/activate
-                    pip install --upgrade pip --break-system-packages
-                    pip install robotframework robotframework-seleniumlibrary selenium webdriver-manager robotframework-requests --break-system-packages
-                """
-            }
-        }
-
         stage('Run Robot Tests') {
+            agent {
+                docker {
+                    image 'python:3.11-slim'
+                    args '-u root:root' // run as root to allow pip install
+                }
+            }
             steps {
+                sh '''
+                    python3 -m venv robotenv
+                    . robotenv/bin/activate
+                    pip install --upgrade pip
+                    pip install robotframework robotframework-seleniumlibrary selenium webdriver-manager robotframework-requests
+                    mkdir -p results
+                '''
+
                 script {
                     if (params.TEST_TYPE == 'UI') {
-                        sh """
-                            . ${VENV_DIR}/bin/activate
-                            mkdir -p results
-                            robot -d results tests/ui
-                        """
+                        sh '. robotenv/bin/activate && robot -d results tests/ui'
                     } else if (params.TEST_TYPE == 'API') {
-                        sh """
-                            . ${VENV_DIR}/bin/activate
-                            mkdir -p results
-                            robot -d results tests/api
-                        """
+                        sh '. robotenv/bin/activate && robot -d results tests/api'
                     } else if (params.TEST_TYPE == 'BOTH') {
-                        sh """
-                            . ${VENV_DIR}/bin/activate
-                            mkdir -p results
-                            robot -d results tests
-                        """
+                        sh '. robotenv/bin/activate && robot -d results tests'
                     }
                 }
             }
         }
 
         stage('Run k6 Performance Test') {
+            agent {
+                docker {
+                    image 'loadimpact/k6:latest'
+                }
+            }
             when {
-                expression { return params.TEST_TYPE == 'PERF' || params.TEST_TYPE == 'BOTH' }
+                expression { return params.TEST_TYPE == 'BOTH' }
             }
             steps {
-                // Install k6 if not already installed
-                sh 'which k6 || sudo apt-get update && sudo apt-get install -y k6'
-
-                // Run the k6 script
-                sh """
+                sh '''
                     mkdir -p k6_results
                     k6 run --out json=k6_results/perf.json tests/perf/load_test.js
-                """
+                '''
             }
         }
 
         stage('Publish Reports') {
+            agent any
             steps {
                 archiveArtifacts artifacts: 'results/*.html', allowEmptyArchive: true
                 archiveArtifacts artifacts: 'k6_results/*.json', allowEmptyArchive: true
