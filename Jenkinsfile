@@ -9,6 +9,10 @@ pipeline {
         )
     }
 
+    environment {
+        VENV_DIR = "${WORKSPACE}/robotenv"
+    }
+
     stages {
 
         // ------------------------------
@@ -19,33 +23,35 @@ pipeline {
         }
 
         // ------------------------------
+        stage('Setup Python Environment') {
+            steps {
+                sh """
+                    python3 -m venv ${VENV_DIR}
+                    . ${VENV_DIR}/bin/activate
+                    pip install --upgrade pip
+                    pip install robotframework robotframework-seleniumlibrary selenium webdriver-manager robotframework-requests
+                """
+            }
+        }
+
+        // ------------------------------
         stage('Run Robot Tests') {
             steps {
                 script {
                     if (params.TEST_TYPE == 'UI' || params.TEST_TYPE == 'BOTH') {
-                        sh '''
-                        docker run --rm -v $WORKSPACE:/workspace -w /workspace python:3.11-slim bash -c "
-                            python3 -m venv robotenv &&
-                            . robotenv/bin/activate &&
-                            pip install --upgrade pip &&
-                            pip install robotframework robotframework-seleniumlibrary selenium webdriver-manager robotframework-requests &&
-                            mkdir -p results &&
+                        sh """
+                            . ${VENV_DIR}/bin/activate
+                            mkdir -p results
                             robot -d results tests/ui
-                        "
-                        '''
+                        """
                     }
 
                     if (params.TEST_TYPE == 'API' || params.TEST_TYPE == 'BOTH') {
-                        sh '''
-                        docker run --rm -v $WORKSPACE:/workspace -w /workspace python:3.11-slim bash -c "
-                            python3 -m venv robotenv &&
-                            . robotenv/bin/activate &&
-                            pip install --upgrade pip &&
-                            pip install robotframework robotframework-seleniumlibrary selenium webdriver-manager robotframework-requests &&
-                            mkdir -p results &&
+                        sh """
+                            . ${VENV_DIR}/bin/activate
+                            mkdir -p results
                             robot -d results tests/api
-                        "
-                        '''
+                        """
                     }
                 }
             }
@@ -57,15 +63,13 @@ pipeline {
                 expression { return params.TEST_TYPE == 'BOTH' }
             }
             steps {
-                // Run k6 test and save JSON summary
-                sh '''
-                mkdir -p k6_results
-                docker run --rm -v $WORKSPACE:/workspace -w /workspace loadimpact/k6:latest \
+                sh """
+                    mkdir -p k6_results
                     k6 run --summary-export=k6_results/perf_summary.json tests/perf/load_test.js
-                '''
+                """
 
-                // Convert JSON summary to nicer HTML report
-                sh '''
+                // Convert k6 JSON summary to simple HTML
+                sh """
                 python3 - <<EOF
 import json
 summary_file = 'k6_results/perf_summary.json'
@@ -79,7 +83,6 @@ html += "<h2>k6 Performance Summary</h2>"
 html += "<table border='1' cellpadding='5' cellspacing='0'>"
 html += "<tr><th>Metric</th><th>Value</th></tr>"
 
-# Show important metrics in a readable format
 metrics_to_show = ['iterations', 'vus_max', 'http_reqs', 'http_req_failed', 'http_req_duration']
 
 for key in metrics_to_show:
@@ -91,19 +94,16 @@ html += "</table></body></html>"
 with open(html_file, 'w') as f:
     f.write(html)
 EOF
-                '''
+                """
             }
         }
 
         // ------------------------------
         stage('Publish Reports') {
             steps {
-                // Archive Robot Framework reports
                 archiveArtifacts artifacts: 'results/*.html', allowEmptyArchive: true
-                // Archive k6 report
                 archiveArtifacts artifacts: 'k6_results/*.html', allowEmptyArchive: true
 
-                // Jenkins Robot plugin integration
                 robot outputPath: 'results',
                       outputFileName: 'output.xml',
                       logFileName: 'log.html',
