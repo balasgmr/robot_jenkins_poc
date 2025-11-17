@@ -22,15 +22,22 @@ pipeline {
             }
         }
 
-        /* -------------------------------------------------------
-                        ROBOT FRAMEWORK - UI
-        -------------------------------------------------------- */
-        stage('Run UI Tests') {
-            when {
-                expression { params.TEST_TYPE == "UI" }
-            }
+        stage('Install Dependencies') {
             steps {
-                echo "Running UI Tests..."
+                sh """
+                    python3 -m pip install --upgrade pip
+                    pip install -r requirements.txt
+                """
+            }
+        }
+
+        /* -----------------------------------------
+              UI TESTS
+        ----------------------------------------- */
+        stage('Run UI Tests') {
+            when { expression { params.TEST_TYPE == "UI" } }
+            steps {
+                echo "Running UI Robot tests..."
                 sh """
                     mkdir -p ${ROBOT_REPORT_DIR}
                     robot -d ${ROBOT_REPORT_DIR} tests/ui
@@ -38,21 +45,18 @@ pipeline {
             }
             post {
                 always {
-                    echo "Publishing Robot Framework UI Reports"
                     robot outputPath: "${ROBOT_REPORT_DIR}"
                 }
             }
         }
 
-        /* -------------------------------------------------------
-                        ROBOT FRAMEWORK - API
-        -------------------------------------------------------- */
+        /* -----------------------------------------
+              API TESTS
+        ----------------------------------------- */
         stage('Run API Tests') {
-            when {
-                expression { params.TEST_TYPE == "API" }
-            }
+            when { expression { params.TEST_TYPE == "API" } }
             steps {
-                echo "Running API Tests..."
+                echo "Running API Robot tests..."
                 sh """
                     mkdir -p ${ROBOT_REPORT_DIR}
                     robot -d ${ROBOT_REPORT_DIR} tests/api
@@ -60,30 +64,26 @@ pipeline {
             }
             post {
                 always {
-                    echo "Publishing Robot Framework API Reports"
                     robot outputPath: "${ROBOT_REPORT_DIR}"
                 }
             }
         }
 
-        /* -------------------------------------------------------
-                        PERFORMANCE - K6
-        -------------------------------------------------------- */
-        stage('Run k6 Performance Test') {
-            when {
-                expression { params.TEST_TYPE == "PERFORMANCE" }
-            }
+        /* -----------------------------------------
+              PERFORMANCE (k6)
+        ----------------------------------------- */
+        stage('Run Performance Tests') {
+            when { expression { params.TEST_TYPE == "PERFORMANCE" } }
             steps {
-                echo "Running k6 Load Test..."
+                echo "Running k6 load test..."
                 sh """
                     mkdir -p ${K6_REPORT_DIR}
-                    k6 run load_test.js --out json=${K6_REPORT_DIR}/k6_results.json
+                    k6 run tests/perf/load_test.js --out json=${K6_REPORT_DIR}/k6.json
                 """
             }
             post {
                 always {
-                    echo "Archiving k6 Results"
-                    archiveArtifacts artifacts: "${K6_REPORT_DIR}/*.json", allowEmptyArchive: true
+                    archiveArtifacts artifacts: "${K6_REPORT_DIR}/*.json"
                 }
             }
         }
@@ -92,8 +92,7 @@ pipeline {
 
     post {
         always {
-            echo "Pipeline finished for TEST_TYPE = ${params.TEST_TYPE}"
+            echo "Pipeline completed. Selected TEST_TYPE = ${params.TEST_TYPE}"
         }
     }
-
 }
