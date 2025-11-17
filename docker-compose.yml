@@ -1,6 +1,7 @@
 services:
   jenkins:
-    image: jenkins/jenkins:lts
+    build: .
+    image: custom-jenkins:lts
     container_name: jenkins
     ports:
       - "9090:8080"
