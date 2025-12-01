@@ -32,6 +32,24 @@ pipeline {
             }
         }
 
+        stage('Install Chrome & ChromeDriver') {
+            when { expression { params.TEST_TYPE == 'UI' } }
+            steps {
+                sh """
+                    # Install Chrome
+                    apt-get update
+                    apt-get install -y wget gnupg unzip
+                    wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+                    sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+                    apt-get update
+                    apt-get install -y google-chrome-stable
+
+                    # Verify Chrome installation
+                    google-chrome --version
+                """
+            }
+        }
+
         stage('Run UI Tests') {
             when { expression { params.TEST_TYPE == 'UI' } }
             steps {
@@ -39,7 +57,10 @@ pipeline {
                 sh """
                     mkdir -p ${ROBOT_REPORT_DIR}
                     . venv/bin/activate
-                    robot -d ${ROBOT_REPORT_DIR} tests/ui
+                    # Retry once in case of intermittent Chrome failure
+                    for i in 1 2; do
+                        robot -d ${ROBOT_REPORT_DIR} tests/ui && break || sleep 5
+                    done
                 """
             }
             post {
