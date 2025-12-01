@@ -9,8 +9,8 @@ ${URL}    https://demoqa.com
 # Open Browser at Home Page (Headless)
 # ---------------------------------------------------------
 Open Headless Browser
-    ${options}=    Evaluate    sys.modules['selenium.webdriver'].ChromeOptions()    sys, selenium.webdriver
-    Call Method    ${options}    add_argument    --headless
+    ${options}=    Evaluate    __import__('selenium.webdriver').webdriver.ChromeOptions()
+    Call Method    ${options}    add_argument    --headless=new
     Call Method    ${options}    add_argument    --no-sandbox
     Call Method    ${options}    add_argument    --disable-dev-shm-usage
     Call Method    ${options}    add_argument    --disable-gpu
@@ -23,8 +23,8 @@ Open Headless Browser
 # ---------------------------------------------------------
 Open Headless Browser To
     [Arguments]    ${PATH}
-    ${options}=    Evaluate    sys.modules['selenium.webdriver'].ChromeOptions()    sys, selenium.webdriver
-    Call Method    ${options}    add_argument    --headless
+    ${options}=    Evaluate    __import__('selenium.webdriver').webdriver.ChromeOptions()
+    Call Method    ${options}    add_argument    --headless=new
     Call Method    ${options}    add_argument    --no-sandbox
     Call Method    ${options}    add_argument    --disable-dev-shm-usage
     Call Method    ${options}    add_argument    --disable-gpu
