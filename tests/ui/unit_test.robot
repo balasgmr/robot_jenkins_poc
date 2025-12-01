@@ -1,23 +1,18 @@
 *** Settings ***
 Library    SeleniumLibrary
 
-*** Variables ***
-${URL}    https://www.selenium.dev/selenium/web/web-form.html
-
 *** Keywords ***
 Open Headless Chrome
     ${options}=    Evaluate    __import__('selenium.webdriver').ChromeOptions()
     Call Method    ${options}    add_argument    --headless=new
     Call Method    ${options}    add_argument    --no-sandbox
     Call Method    ${options}    add_argument    --disable-dev-shm-usage
-    Call Method    ${options}    add_argument    --disable-gpu
     Call Method    ${options}    add_argument    --window-size=1920,1080
     Call Method    ${options}    add_argument    --remote-allow-origins=*
 
-    # Use webdriver-manager to get the correct ChromeDriver
     ${driver}=    Evaluate    __import__('webdriver_manager.chrome').ChromeDriverManager().install()
-
     Create WebDriver    Chrome    options=${options}    executable_path=${driver}
+
     Go To    ${URL}
 
 *** Test Cases ***
