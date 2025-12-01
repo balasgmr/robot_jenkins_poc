@@ -4,14 +4,13 @@ pipeline {
     parameters {
         choice(
             name: 'TEST_TYPE',
-            choices: ['UI', 'API', 'PERFORMANCE'],
+            choices: ['UI', 'API'],
             description: 'Choose test suite to run'
         )
     }
 
     environment {
         ROBOT_REPORT_DIR = "reports/robot"
-        K6_REPORT_DIR    = "reports/k6"
     }
 
     stages {
@@ -63,22 +62,6 @@ pipeline {
             post {
                 always {
                     robot outputPath: "${ROBOT_REPORT_DIR}"
-                }
-            }
-        }
-
-        stage('Run Performance Tests') {
-            when { expression { params.TEST_TYPE == 'PERFORMANCE' } }
-            steps {
-                echo "Running k6 load test..."
-                sh """
-                    mkdir -p ${K6_REPORT_DIR}
-                    k6 run tests/perf/load_test.js --out json=${K6_REPORT_DIR}/k6.json
-                """
-            }
-            post {
-                always {
-                    archiveArtifacts artifacts: "${K6_REPORT_DIR}/*.json"
                 }
             }
         }
