@@ -21,7 +21,7 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Install Python Dependencies') {
             steps {
                 sh """
                     python3 -m venv venv
@@ -32,36 +32,41 @@ pipeline {
             }
         }
 
-        stage('Install Chrome & ChromeDriver') {
+        stage('Install Chrome & Chromedriver') {
             when { expression { params.TEST_TYPE == 'UI' } }
             steps {
-                sh """
-                    # Install Chrome
-                    apt-get update
-                    apt-get install -y wget gnupg unzip
-                    wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
-                    sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-                    apt-get update
-                    apt-get install -y google-chrome-stable
+                sh '''
+                    echo "Installing Chrome & Chromedriver as root..."
+                    su root -c "apt-get update"
+                    su root -c "apt-get install -y wget unzip gnupg2"
+                    su root -c "wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -"
+                    su root -c "sh -c 'echo \\"deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main\\" >> /etc/apt/sources.list.d/google-chrome.list'"
+                    su root -c "apt-get update"
+                    su root -c "apt-get install -y google-chrome-stable"
 
-                    # Verify Chrome installation
-                    google-chrome --version
-                """
+                    # Install matching ChromeDriver
+                    CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d. -f1)
+                    DRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}")
+
+                    wget https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip
+                    unzip chromedriver_linux64.zip
+                    su root -c "mv chromedriver /usr/local/bin/"
+                    chmod +x /usr/local/bin/chromedriver
+                '''
             }
         }
 
         stage('Run UI Tests') {
             when { expression { params.TEST_TYPE == 'UI' } }
             steps {
-                echo "Running UI Tests..."
-                sh """
-                    mkdir -p ${ROBOT_REPORT_DIR}
+                sh '''
+                    mkdir -p reports/robot
                     . venv/bin/activate
-                    # Retry once in case of intermittent Chrome failure
-                    for i in 1 2; do
-                        robot -d ${ROBOT_REPORT_DIR} tests/ui && break || sleep 5
-                    done
-                """
+
+                    export ROBOT_OPTIONS="--variable BROWSER_ARGS:--no-sandbox --variable BROWSER_ARGS:--disable-dev-shm-usage --variable BROWSER_ARGS:--headless=new"
+
+                    robot -d reports/robot tests/ui
+                '''
             }
             post {
                 always {
@@ -73,12 +78,11 @@ pipeline {
         stage('Run API Tests') {
             when { expression { params.TEST_TYPE == 'API' } }
             steps {
-                echo "Running API Tests..."
-                sh """
-                    mkdir -p ${ROBOT_REPORT_DIR}
+                sh '''
+                    mkdir -p reports/robot
                     . venv/bin/activate
-                    robot -d ${ROBOT_REPORT_DIR} tests/api
-                """
+                    robot -d reports/robot tests/api
+                '''
             }
             post {
                 always {
@@ -90,7 +94,4 @@ pipeline {
 
     post {
         always {
-            echo "Pipeline completed. Selected TEST_TYPE = ${params.TEST_TYPE}"
-        }
-    }
-}
+            echo "Pipeline completed. Se
