@@ -7,14 +7,8 @@ RUN apt-get update && \
     apt-get install -y python3 python3-venv python3-pip git curl wget unzip xvfb \
                        libnss3 libgconf-2-4 fonts-liberation libxss1 libappindicator3-1 xdg-utils
 
-# Install Google Chrome
-RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
-    apt install -y ./google-chrome-stable_current_amd64.deb
-
-# Copy Python requirements
+# Add Python virtual environment
 COPY requirements.txt /tmp/requirements.txt
-
-# Create Python virtual environment and install dependencies
 RUN python3 -m venv /opt/venv && \
     /opt/venv/bin/pip install --upgrade pip && \
     /opt/venv/bin/pip install -r /tmp/requirements.txt
