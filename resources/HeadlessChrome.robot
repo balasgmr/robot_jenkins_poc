@@ -9,6 +9,6 @@ Open Headless Chrome
     Call Method    ${options}    add_argument    --disable-gpu
     Call Method    ${options}    add_argument    --disable-dev-shm-usage
     Call Method    ${options}    add_argument    --disable-software-rasterizer
-    Call Method    ${options}    add_argument    --remote-debugging-port=0
+    Call Method    ${options}    add_argument    --remote-debugging-port=9222
     Call Method    ${options}    add_argument    --window-size=1920,1080
     Create WebDriver    Chrome    options=${options}    executable_path=/usr/local/bin/chromedriver

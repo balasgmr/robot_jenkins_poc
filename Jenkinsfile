@@ -63,7 +63,7 @@ pipeline {
                 sh """
                 . venv/bin/activate
                 mkdir -p reports/robot
-                robot -d reports/robot tests/ui tests/unit || true
+                robot -d reports/robot --variable HEADLESS:True tests/ui tests/unit || true
                 """
             }
         }
@@ -93,12 +93,6 @@ pipeline {
         always {
             echo "Pipeline completed. Publishing Robot results..."
             robot outputPath: 'reports/robot'
-        }
-        success {
-            echo "All tests completed successfully."
-        }
-        failure {
-            echo "Some tests failed. Check reports for details."
         }
     }
 }
