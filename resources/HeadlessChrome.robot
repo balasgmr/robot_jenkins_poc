@@ -10,3 +10,4 @@ Open Headless Chrome
 
     ${driver_path}=    Evaluate    __import__('webdriver_manager.chrome').ChromeDriverManager().install()    sys
     Create WebDriver    Chrome    chrome_options=${options}    executable_path=${driver_path}
+
