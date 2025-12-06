@@ -30,7 +30,6 @@ pipeline {
 
         stage('Run UI Tests') {
             steps {
-                echo 'Running UI Tests...'
                 sh '''
                     . venv/bin/activate
                     mkdir -p reports/robot
