@@ -1,20 +1,9 @@
 pipeline {
-    agent {
-        docker {
-            image 'selenium/standalone-chrome:latest'
-            args '-u root:root'
-        }
-    }
+    agent any
 
     environment {
         TEST_TYPE = "UI"
         VENV_PATH = "${WORKSPACE}/venv"
-    }
-
-    options {
-        // Clean workspace before build
-        skipDefaultCheckout false
-        buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
     stages {
@@ -46,7 +35,7 @@ pipeline {
                 sh """
                     . ${VENV_PATH}/bin/activate
                     mkdir -p reports/robot
-                    # Run only Sampletest.robot to avoid failing Unit Test
+                    # Run only Sampletest.robot to skip failing Unit Test
                     robot -d reports/robot tests/ui/Sampletest.robot
                 """
             }
@@ -54,10 +43,9 @@ pipeline {
 
         stage('Run API Tests') {
             when {
-                expression { return currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
+                expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
             }
             steps {
-                echo 'Running API Tests...'
                 sh """
                     . ${VENV_PATH}/bin/activate
                     robot -d reports/robot tests/api
@@ -67,10 +55,10 @@ pipeline {
 
         stage('Run Performance Tests') {
             when {
-                expression { return currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
+                expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
             }
             steps {
-                echo 'Running Performance Tests...'
+                echo "Skipping for now"
             }
         }
     }
