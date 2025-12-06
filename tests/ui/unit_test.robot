@@ -2,7 +2,7 @@
 Library    SeleniumLibrary
 Resource   ../../resources/HeadlessChrome.robot
 
-Suite Setup       Open Headless Browser
+Suite Setup       Open Headless Chrome
 Suite Teardown    Close All Browsers
 
 *** Variables ***

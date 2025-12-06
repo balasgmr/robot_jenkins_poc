@@ -15,7 +15,6 @@ Open Headless Browser To
     Wait Until Page Contains Element    css:body    10s
 
 *** Test Cases ***
-
 Textbox Form Submission
     Open Headless Browser To    /text-box
     Wait Until Element Is Visible    id:userName
