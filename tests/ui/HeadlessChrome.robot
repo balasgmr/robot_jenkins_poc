@@ -1,3 +1,6 @@
+*** Settings ***
+Library    SeleniumLibrary
+
 *** Keywords ***
 Open Headless Chrome
     ${options}=    Evaluate    sys.modules['selenium.webdriver'].ChromeOptions()    sys, selenium.webdriver

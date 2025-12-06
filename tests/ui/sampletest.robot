@@ -1,38 +1,18 @@
 *** Settings ***
 Library    SeleniumLibrary
+Resource   headless_chrome.robot
 
 *** Variables ***
 ${URL}    https://demoqa.com
 
 *** Keywords ***
-# ---------------------------------------------------------
-# Open Browser at Home Page (Headless)
-# ---------------------------------------------------------
 Open Headless Browser
-    ${options}=    Evaluate    __import__('selenium.webdriver').webdriver.ChromeOptions()
-    Call Method    ${options}    add_argument    --headless=new
-    Call Method    ${options}    add_argument    --no-sandbox
-    Call Method    ${options}    add_argument    --disable-dev-shm-usage
-    Call Method    ${options}    add_argument    --disable-gpu
-    Call Method    ${options}    add_argument    --window-size=1920,1080
-
-    Create WebDriver    Chrome    options=${options}
+    Open Headless Chrome
     Go To    ${URL}
 
-# ---------------------------------------------------------
-# Open Browser To a Specific Page (Headless)
-# Example: Open Headless Browser To    /text-box
-# ---------------------------------------------------------
 Open Headless Browser To
     [Arguments]    ${PATH}
-    ${options}=    Evaluate    __import__('selenium.webdriver').webdriver.ChromeOptions()
-    Call Method    ${options}    add_argument    --headless=new
-    Call Method    ${options}    add_argument    --no-sandbox
-    Call Method    ${options}    add_argument    --disable-dev-shm-usage
-    Call Method    ${options}    add_argument    --disable-gpu
-    Call Method    ${options}    add_argument    --window-size=1920,1080
-
-    Create WebDriver    Chrome    options=${options}
+    Open Headless Chrome
     Go To    ${URL}${PATH}
     Wait Until Page Contains Element    css:body    10s
 
@@ -45,10 +25,8 @@ Textbox Form Submission
     Input Text    id:userEmail          bala@example.com
     Input Text    id:currentAddress     Madurai
     Input Text    id:permanentAddress   India
-
     Scroll Element Into View    id:submit
     Click Button                id:submit
-
     Page Should Contain    Bala
     Close Browser
 
