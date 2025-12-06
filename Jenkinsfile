@@ -1,25 +1,19 @@
 pipeline {
-    agent {
-        docker {
-            image 'jenkins-chrome-agent:latest'   // Your custom image
-            args '-u root:root'                   // Run as root inside container
-        }
-    }
+    agent any
 
     environment {
         TEST_TYPE = "UI"
-        ROBOT_REPORT_DIR = "reports/robot"
+        DISPLAY = ":99"
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Install Python Dependencies') {
+        stage('Install Dependencies') {
             steps {
                 sh '''
                 python3 -m venv venv
@@ -34,51 +28,52 @@ pipeline {
             steps {
                 echo "Running UI Tests..."
                 sh '''
-                mkdir -p ${ROBOT_REPORT_DIR}
+                # Start virtual display
+                Xvfb :99 -screen 0 1920x1080x24 &
+                export DISPLAY=:99
+
                 . venv/bin/activate
-                robot -d ${ROBOT_REPORT_DIR} tests/ui
+                mkdir -p reports/robot
+                # Run all UI tests
+                robot -d reports/robot tests/ui
                 '''
             }
         }
 
         stage('Run API Tests') {
             when {
-                expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
+                expression { return true }  // set to false to skip
             }
             steps {
                 echo "Running API Tests..."
                 sh '''
                 . venv/bin/activate
-                robot -d ${ROBOT_REPORT_DIR} tests/api
+                mkdir -p reports/robot
+                robot -d reports/robot tests/api
                 '''
             }
         }
 
         stage('Run Performance Tests') {
             when {
-                expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
+                expression { return true }  // set to false to skip
             }
             steps {
                 echo "Running Performance Tests..."
-                sh 'k6 run tests/performance/test.js'
+                sh '''
+                . venv/bin/activate
+                mkdir -p reports/robot
+                robot -d reports/robot tests/performance
+                '''
             }
         }
     }
 
     post {
         always {
-            echo "Publishing Robot Framework Results..."
-            robot outputPath: "${ROBOT_REPORT_DIR}/output.xml",
-                  logPath: "${ROBOT_REPORT_DIR}/log.html",
-                  reportPath: "${ROBOT_REPORT_DIR}/report.html"
-        }
-
-        success {
-            echo "Pipeline completed successfully!"
-        }
-
-        failure {
-            echo "Pipeline failed!"
+            echo "Pipeline completed. Selected TEST_TYPE = ${TEST_TYPE}"
+            # Publish Robot results
+            robot outputPath: 'reports/robot'
         }
     }
 }
