@@ -7,6 +7,7 @@ pipeline {
     }
 
     stages {
+
         stage('Clean Workspace') {
             steps {
                 deleteDir()
@@ -35,8 +36,7 @@ pipeline {
                 sh """
                     . ${VENV_PATH}/bin/activate
                     mkdir -p reports/robot
-                    # Run only Sampletest.robot to skip failing Unit Test
-                    robot -d reports/robot tests/ui/Sampletest.robot
+                    robot -d reports/robot tests/ui
                 """
             }
         }
@@ -50,15 +50,6 @@ pipeline {
                     . ${VENV_PATH}/bin/activate
                     robot -d reports/robot tests/api
                 """
-            }
-        }
-
-        stage('Run Performance Tests') {
-            when {
-                expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
-            }
-            steps {
-                echo "Skipping for now"
             }
         }
     }
