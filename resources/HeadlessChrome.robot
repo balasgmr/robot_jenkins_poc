@@ -1,26 +1,25 @@
 *** Settings ***
 Library    SeleniumLibrary
-Library    OperatingSystem
 Library    Collections
 Library    BuiltIn
+Library    OperatingSystem
 
 *** Keywords ***
 Open Headless Chrome
     [Arguments]    ${url}=None
-    # Import ChromeOptions
+    # Get the correct ChromeOptions class from Selenium
     ${options}=    Evaluate    sys.modules['selenium.webdriver'].ChromeOptions()    sys, selenium.webdriver
-    # Headless mode (new) and additional args
-    Call Method    ${options}    add_argument    headless=new
+    # Add headless mode (works with recent Selenium/Chrome versions)
+    Call Method    ${options}    add_argument    --headless=new
     Call Method    ${options}    add_argument    --no-sandbox
     Call Method    ${options}    add_argument    --disable-dev-shm-usage
     Call Method    ${options}    add_argument    --disable-gpu
     Call Method    ${options}    add_argument    --window-size=1920,1080
-    # Create WebDriver with options
+    # Create WebDriver instance explicitly
     Create WebDriver    Chrome    options=${options}
-    # If URL is passed, go to it
+    # Go to URL if provided
     Run Keyword If    ${url}    Go To    ${url}
     Wait Until Page Contains Element    css:body    10s
 
 Close Headless Chrome
-    [Documentation]    Closes all Chrome browsers
     Close All Browsers
