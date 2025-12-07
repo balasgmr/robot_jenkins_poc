@@ -1,8 +1,15 @@
 pipeline {
     agent any
 
+    parameters {
+        choice(
+            name: 'TEST_TYPE',
+            choices: ['UI', 'API'],
+            description: 'Select which tests to run'
+        )
+    }
+
     environment {
-        TEST_TYPE = "UI"
         VENV_PATH = "${WORKSPACE}/venv"
     }
 
@@ -32,6 +39,9 @@ pipeline {
         }
 
         stage('Run UI Tests') {
+            when {
+                expression { params.TEST_TYPE == 'UI' }
+            }
             steps {
                 sh """
                     . ${VENV_PATH}/bin/activate
@@ -43,7 +53,7 @@ pipeline {
 
         stage('Run API Tests') {
             when {
-                expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
+                expression { params.TEST_TYPE == 'API' }
             }
             steps {
                 sh """
@@ -56,7 +66,7 @@ pipeline {
 
     post {
         always {
-            echo "Pipeline completed. Selected TEST_TYPE = ${TEST_TYPE}"
+            echo "Pipeline completed. Selected TEST_TYPE = ${params.TEST_TYPE}"
             robot outputPath: 'reports/robot'
         }
         failure {
