@@ -9,11 +9,11 @@ Open Headless Chrome
     # Create ChromeOptions object
     ${options}=    Evaluate    sys.modules['selenium.webdriver'].ChromeOptions()    sys, selenium.webdriver
     # Add headless & other args
-    Call Method    ${options}    add_argument    --headless=new
-    Call Method    ${options}    add_argument    --no-sandbox
-    Call Method    ${options}    add_argument    --disable-dev-shm-usage
-    Call Method    ${options}    add_argument    --disable-gpu
-    Call Method    ${options}    add_argument    --window-size=1920,1080
+    Call Method    ${options}    add_argument    headless
+    Call Method    ${options}    add_argument    no-sandbox
+    Call Method    ${options}    add_argument    disable-dev-shm-usage
+    Call Method    ${options}    add_argument    disable-gpu
+    Call Method    ${options}    add_argument    window-size=1920,1080
     # Start Chrome with options
     Create WebDriver    Chrome    options=${options}
     Go To    ${URL}
