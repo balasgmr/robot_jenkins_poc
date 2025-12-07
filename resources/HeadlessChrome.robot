@@ -13,8 +13,9 @@ Open Headless Chrome
     Call Method    ${options}    add_argument    no-sandbox
     Call Method    ${options}    add_argument    disable-dev-shm-usage
     Call Method    ${options}    add_argument    disable-gpu
-    Call Method    ${options}    add_argument    window-size=1920,1080
+    Call Method    ${options}    add_argument    "window-size=1920,1080"
     # Start Chrome with options
     Create WebDriver    Chrome    options=${options}
     Go To    ${URL}
     Wait Until Page Contains Element    css:body    10s
+
