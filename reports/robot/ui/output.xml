@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.3.2 (Python 3.13.2 on win32)" generated="2025-12-07T12:40:59.553473" rpa="false" schemaversion="5">
+<suite id="s1" name="Ui" source="C:\Users\Bala\OneDrive\Desktop\Ajay folders\CI_CD\SESSIONS\Robot_jenkins\tests\ui">
+<suite id="s1-s1" name="Sampletest" source="C:\Users\Bala\OneDrive\Desktop\Ajay folders\CI_CD\SESSIONS\Robot_jenkins\tests\ui\sampletest.robot">
+<kw name="Open Headless Chrome" owner="HeadlessChrome" type="SETUP">
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2025-12-07T12:40:59.748024" level="INFO">${options} = &lt;selenium.webdriver.chrome.options.Options object at 0x000001B8B45DA510&gt;</msg>
+<var>${options}</var>
+<arg>sys.modules['selenium.webdriver'].ChromeOptions()</arg>
+<arg>sys, selenium.webdriver</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2025-12-07T12:40:59.747726" elapsed="0.000336"/>
+</kw>
+<kw name="Call Method" owner="BuiltIn">
+<arg>${options}</arg>
+<arg>add_argument</arg>
+<arg>--headless\=new</arg>
+<doc>Calls the named method of the given object with the provided arguments.</doc>
+<status status="PASS" start="2025-12-07T12:40:59.748191" elapsed="0.000136"/>
+</kw>
+<kw name="Call Method" owner="BuiltIn">
+<arg>${options}</arg>
+<arg>add_argument</arg>
+<arg>--no-sandbox</arg>
+<doc>Calls the named method of the given object with the provided arguments.</doc>
+<status status="PASS" start="2025-12-07T12:40:59.748420" elapsed="0.000094"/>
+</kw>
+<kw name="Call Method" owner="BuiltIn">
+<arg>${options}</arg>
+<arg>add_argument</arg>
+<arg>--disable-dev-shm-usage</arg>
+<doc>Calls the named method of the given object with the provided arguments.</doc>
+<status status="PASS" start="2025-12-07T12:40:59.748586" elapsed="0.000082"/>
+</kw>
+<kw name="Call Method" owner="BuiltIn">
+<arg>${options}</arg>
+<arg>add_argument</arg>
+<arg>--window-size\=1920,1080</arg>
+<doc>Calls the named method of the given object with the provided arguments.</doc>
+<status status="PASS" start="2025-12-07T12:40:59.748743" elapsed="0.000102"/>
+</kw>
+<kw name="Create Webdriver" owner="SeleniumLibrary">
+<msg time="2025-12-07T12:40:59.749060" level="INFO">Creating an instance of the Chrome WebDriver.</msg>
+<arg>Chrome</arg>
+<arg>options=${options}</arg>
+<doc>Creates an instance of Selenium WebDriver.</doc>
+<status status="PASS" start="2025-12-07T12:40:59.748928" elapsed="1.189451"/>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2025-12-07T12:41:00.938777" level="INFO">Opening url 'https://demoqa.com'</msg>
+<arg>${URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2025-12-07T12:41:00.938587" elapsed="5.280638"/>
+</kw>
+<kw name="Execute Javascript" owner="SeleniumLibrary">
+<msg time="2025-12-07T12:41:06.219715" level="INFO">Executing JavaScript:
+var _id='adplus-anchor'; var _i=setInterval(function(){ var e=document.getElementById(_id); if(e){ e.remove(); clearInterval(_i); } },200);
+Without any arguments.</msg>
+<arg>var _id='adplus-anchor'; var _i=setInterval(function(){ var e=document.getElementById(_id); if(e){ e.remove(); clearInterval(_i); } },200);</arg>
+<doc>Executes the given JavaScript code with possible arguments.</doc>
+<status status="PASS" start="2025-12-07T12:41:06.219399" elapsed="0.008958"/>
+</kw>
+<status status="PASS" start="2025-12-07T12:40:59.747149" elapsed="6.481457"/>
+</kw>
+<test id="s1-s1-t1" name="Textbox Form Submission" line="11">
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2025-12-07T12:41:06.230528" level="INFO">Opening url 'https://demoqa.com/text-box'</msg>
+<arg>${URL}/text-box</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2025-12-07T12:41:06.230209" elapsed="5.461438"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2025-12-07T12:41:11.692637" level="INFO">Typing text 'Bala Sugumar' into text field 'id:userName'.</msg>
+<arg>id:userName</arg>
+<arg>Bala Sugumar</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2025-12-07T12:41:11.692031" elapsed="0.146223"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2025-12-07T12:41:11.838909" level="INFO">Typing text 'bala@example.com' into text field 'id:userEmail'.</msg>
+<arg>id:userEmail</arg>
+<arg>bala@example.com</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2025-12-07T12:41:11.838665" elapsed="0.083904"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2025-12-07T12:41:11.923181" level="INFO">Typing text 'Madurai' into text field 'id:currentAddress'.</msg>
+<arg>id:currentAddress</arg>
+<arg>Madurai</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2025-12-07T12:41:11.922906" elapsed="0.068841"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2025-12-07T12:41:11.992432" level="INFO">Typing text 'Madurai' into text field 'id:permanentAddress'.</msg>
+<arg>id:permanentAddress</arg>
+<arg>Madurai</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2025-12-07T12:41:11.992166" elapsed="0.126341"/>
+</kw>
+<kw name="Execute Javascript" owner="SeleniumLibrary">
+<msg time="2025-12-07T12:41:12.119401" level="INFO">Executing JavaScript:
+document.getElementById('submit').click();
+Without any arguments.</msg>
+<arg>document.getElementById('submit').click();</arg>
+<doc>Executes the given JavaScript code with possible arguments.</doc>
+<status status="PASS" start="2025-12-07T12:41:12.118940" elapsed="0.012409"/>
+</kw>
+<kw name="Page Should Contain" owner="SeleniumLibrary">
+<msg time="2025-12-07T12:41:12.147419" level="INFO">Current page contains text 'Bala Sugumar'.</msg>
+<arg>Bala Sugumar</arg>
+<doc>Verifies that current page contains ``text``.</doc>
+<status status="PASS" start="2025-12-07T12:41:12.131693" elapsed="0.015880"/>
+</kw>
+<kw name="Page Should Contain" owner="SeleniumLibrary">
+<msg time="2025-12-07T12:41:12.169256" level="INFO">Current page contains text 'bala@example.com'.</msg>
+<arg>bala@example.com</arg>
+<doc>Verifies that current page contains ``text``.</doc>
+<status status="PASS" start="2025-12-07T12:41:12.148043" elapsed="0.021321"/>
+</kw>
+<doc>Fill the TextBox form and submit</doc>
+<status status="PASS" start="2025-12-07T12:41:06.228775" elapsed="5.941031"/>
+</test>
+<kw name="Close All Browsers" owner="HeadlessChrome" type="TEARDOWN">
+<kw name="Run Keyword" owner="BuiltIn">
+<kw name="Close All Browsers" owner="SeleniumLibrary">
+<doc>Closes all open browsers and resets the browser cache.</doc>
+<status status="PASS" start="2025-12-07T12:41:12.171209" elapsed="2.301879"/>
+</kw>
+<arg>SeleniumLibrary.Close All Browsers</arg>
+<doc>Executes the given keyword with the given arguments.</doc>
+<status status="PASS" start="2025-12-07T12:41:12.171042" elapsed="2.302147"/>
+</kw>
+<status status="PASS" start="2025-12-07T12:41:12.170794" elapsed="2.302459"/>
+</kw>
+<status status="PASS" start="2025-12-07T12:40:59.576918" elapsed="14.896368"/>
+</suite>
+<status status="PASS" start="2025-12-07T12:40:59.554683" elapsed="14.919817"/>
+</suite>
+<statistics>
+<total>
+<stat pass="1" fail="0" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="Ui" id="s1" pass="1" fail="0" skip="0">Ui</stat>
+<stat name="Sampletest" id="s1-s1" pass="1" fail="0" skip="0">Ui.Sampletest</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>

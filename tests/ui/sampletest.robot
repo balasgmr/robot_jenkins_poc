@@ -15,6 +15,7 @@ Textbox Form Submission
     Input Text    id:userEmail   bala@example.com
     Input Text    id:currentAddress   Madurai
     Input Text    id:permanentAddress  Madurai
-    Click Button    id:submit
+    # Use JS click to avoid overlay interception by ads
+    Execute JavaScript    document.getElementById('submit').click();
     Page Should Contain    Bala Sugumar
     Page Should Contain    bala@example.com

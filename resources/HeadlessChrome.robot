@@ -9,9 +9,13 @@ Open Headless Chrome
     Call Method    ${options}    add_argument    --headless\=new
     Call Method    ${options}    add_argument    --no-sandbox
     Call Method    ${options}    add_argument    --disable-dev-shm-usage
-    Call Method    ${options}    add_argument    --window-size=1920,1080
-    Create WebDriver    Chrome    chrome_options=${options}
+    # Escape '=' in window-size as well
+    Call Method    ${options}    add_argument    --window-size\=1920,1080
+    # Use the modern `options` argument (older `chrome_options` is unsupported)
+    Create WebDriver    Chrome    options=${options}
     Go To    ${URL}
+    # Repeatedly remove ad overlays if they are injected after page load
+    Execute JavaScript    var _id='adplus-anchor'; var _i=setInterval(function(){ var e=document.getElementById(_id); if(e){ e.remove(); clearInterval(_i); } },200);
 
 Close All Browsers
-    Close All Browsers
+    Run Keyword    SeleniumLibrary.Close All Browsers
