@@ -69,14 +69,15 @@ pipeline {
         always {
             echo "Pipeline completed. Selected TEST_TYPE = ${params.TEST_TYPE}"
             // Ensure a top-level output.xml exists under reports/robot for the Robot publisher
-            sh """
+            // Use single-quoted string to avoid Groovy interpolation of $ variables
+            sh '''
                 set -e
                 mkdir -p reports/robot
                 found=$(find reports/robot -name output.xml | head -n 1 || true)
                 if [ -n "$found" ]; then
                     cp "$found" reports/robot/output.xml
                 fi
-            """
+            '''
             robot outputPath: 'reports/robot'
         }
         failure {
