@@ -3,6 +3,7 @@ Resource    ../../resources/HeadlessChrome.robot
 Suite Setup    Open Headless Chrome
 Suite Teardown    Close All Browsers
 
+
 *** Variables ***
 ${URL}    https://demoqa.com
 
