@@ -4,7 +4,7 @@ pipeline {
     parameters {
         choice(
             name: 'TEST_TYPE',
-            choices: ['UI', 'API', 'BOTH'],
+            choices: ['UI', 'API'],
             description: 'Select which tests to run'
         )
     }
@@ -40,7 +40,7 @@ pipeline {
 
         stage('Run UI Tests') {
             when {
-                expression { params.TEST_TYPE == 'UI' || params.TEST_TYPE == 'BOTH' }
+                expression { params.TEST_TYPE == 'UI' }
             }
             steps {
                 sh """
@@ -53,7 +53,7 @@ pipeline {
 
         stage('Run API Tests') {
             when {
-                expression { params.TEST_TYPE == 'API' || params.TEST_TYPE == 'BOTH' }
+                expression { params.TEST_TYPE == 'API' }
             }
             steps {
                 sh """
@@ -68,16 +68,7 @@ pipeline {
     post {
         always {
             echo "Pipeline completed. Selected TEST_TYPE = ${params.TEST_TYPE}"
-            
-            // Publish UI results if exist
-            script {
-                if (fileExists('reports/robot/ui/output.xml')) {
-                    robot outputPath: 'reports/robot/ui'
-                }
-                if (fileExists('reports/robot/api/output.xml')) {
-                    robot outputPath: 'reports/robot/api'
-                }
-            }
+            robot outputPath: 'reports/robot'
         }
         failure {
             echo "Pipeline failed!"
